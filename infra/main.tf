@@ -62,6 +62,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
   vnet_subnet_id        = azurerm_subnet.aks_nodes.id
   max_pods              = 30
   mode                  = "User"
+  node_taints = ["workload=apps:NoSchedule"]
 
   node_labels = {
     "workload" = "apps"
