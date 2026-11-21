@@ -29,7 +29,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   default_node_pool {
     name                        = "agentpool"
-    vm_size                     = "Standard_D4ds_v5"
+    vm_size                     = "Standard_D4ds_v4"
     node_count                  = 1
     vnet_subnet_id              = azurerm_subnet.aks_nodes.id
     max_pods                    = 30
@@ -57,7 +57,7 @@ resource "azurerm_kubernetes_cluster" "aks" {
 resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
   name                  = "userpool"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
-  vm_size               = "Standard_D4ds_v5"
+  vm_size               = "Standard_D4ds_v4"
   node_count            = 1
   vnet_subnet_id        = azurerm_subnet.aks_nodes.id
   max_pods              = 30
