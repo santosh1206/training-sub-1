@@ -12,3 +12,8 @@ controller:
     patch:
       nodeSelector:
         agentpool: userpool
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "apps"
+          effect: "NoSchedule"
