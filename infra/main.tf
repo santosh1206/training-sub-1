@@ -29,8 +29,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
   default_node_pool {
     name                        = "agentpool"
-    vm_size                     = "Standard_D2ads_v5"
-    node_count                  = 2
+    vm_size                     = "Standard_D4ds_v5"
+    node_count                  = 1
     vnet_subnet_id              = azurerm_subnet.aks_nodes.id
     max_pods                    = 30
     only_critical_addons_enabled = true # Taints agentpool so only system pods run here
@@ -57,8 +57,8 @@ resource "azurerm_kubernetes_cluster" "aks" {
 resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
   name                  = "userpool"
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks.id
-  vm_size               = "Standard_D2ads_v5"
-  node_count            = 2
+  vm_size               = "Standard_D4ds_v5"
+  node_count            = 1
   vnet_subnet_id        = azurerm_subnet.aks_nodes.id
   max_pods              = 30
   mode                  = "User"
