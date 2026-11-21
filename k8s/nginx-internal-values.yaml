@@ -1,0 +1,14 @@
+controller:
+  replicaCount: 2
+  nodeSelector:
+    agentpool: userpool
+  service:
+    type: LoadBalancer
+    externalTrafficPolicy: Local
+    annotations:
+      service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+      service.beta.kubernetes.io/azure-load-balancer-health-probe-request-path: "/healthz"
+  admissionWebhooks:
+    patch:
+      nodeSelector:
+        agentpool: userpool
