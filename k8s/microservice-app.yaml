@@ -15,6 +15,11 @@ spec:
     spec:
       nodeSelector:
         agentpool: userpool # Pins application pods strictly to User Node Pool
+      tolerations:
+        - key: "workload"
+          operator: "Equal"
+          value: "apps"
+          effect: "NoSchedule"
       topologySpreadConstraints:
         - maxSkew: 1
           topologyKey: kubernetes.io/hostname
