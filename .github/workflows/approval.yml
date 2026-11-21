@@ -1,12 +1,16 @@
-name: 'Terraform Azure CI/CD'
+name: '1 - Deploy AKS Infrastructure (Terraform)'
 
 on:
   pull_request:
     branches:
       - main
+    paths:
+      - "infra/**"
   push:
     branches:
       - main
+    paths:
+      - "infra/**"
 
 concurrency:
   group: terraform-${{ github.ref }}
@@ -16,10 +20,14 @@ permissions:
   id-token: write
   contents: read
 
+defaults:
+  run:
+    working-directory: infra
+
 env:
-  ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
-  ARM_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+  ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+  ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
   ARM_USE_OIDC: true
   TF_IN_AUTOMATION: true
 
@@ -35,15 +43,18 @@ jobs:
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: '1.8.0'
+          terraform_version: '1.9.8'
           terraform_wrapper: false
+
+      - name: Terraform Format Check
+        run: terraform fmt -check -recursive
 
       - name: Terraform Init
         run: terraform init -input=false
@@ -59,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tfplan-${{ github.run_id }}
-          path: tfplan
+          path: infra/tfplan
           retention-days: 7
 
   apply:
@@ -75,14 +86,14 @@ jobs:
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
-          terraform_version: '1.8.0'
+          terraform_version: '1.9.8'
           terraform_wrapper: false
 
       - name: Terraform Init
@@ -92,6 +103,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: tfplan-${{ github.run_id }}
+          path: infra
 
       - name: Inspect Saved Plan
         run: terraform show -no-color tfplan
