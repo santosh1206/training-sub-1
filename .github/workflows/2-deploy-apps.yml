@@ -1,0 +1,63 @@
+name: 2 - Deploy NGINX Ingress & Microservices
+
+on:
+  workflow_run:
+    workflows: ["1 - Deploy AKS Infrastructure (Terraform)"]
+    types: [completed]
+  push:
+    branches: [main]
+    paths: ["k8s/**"]
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy-k8s:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get AKS Credentials
+        run: |
+          az aks get-credentials \
+            --resource-group rg-aks-prod \
+            --name aks-prod-cluster \
+            --overwrite-existing
+
+      - name: Verify Both Node Pools (agentpool & userpool) Are Ready
+        run: |
+          kubectl wait --for=condition=Ready nodes -l agentpool=agentpool --timeout=300s
+          kubectl wait --for=condition=Ready nodes -l agentpool=userpool --timeout=300s
+          kubectl get nodes -L agentpool
+
+      - name: Install / Upgrade NGINX Ingress Controller (Internal LB)
+        run: |
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+          helm repo update
+          helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
+            --namespace ingress-nginx --create-namespace \
+            -f k8s/nginx-internal-values.yaml \
+            --wait
+
+      - name: Apply Namespaces & Microservice Deployments
+        run: |
+          kubectl apply -f k8s/namespaces.yaml
+          kubectl apply -f k8s/microservice-app.yaml
+
+      - name: Verify Rollout & Minimum 2 Pods per Service
+        run: |
+          kubectl rollout status deployment/order-service -n app-ns-1 --timeout=180s
+          kubectl get pods -n app-ns-1 -o wide
+          kubectl get svc -n ingress-nginx
