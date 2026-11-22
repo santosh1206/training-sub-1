@@ -3,6 +3,7 @@ resource "azurerm_resource_group" "aks" {
   location = var.location
 }
 
+
 # 1. VNet & Node Subnet (Sized /22 for Classic Azure CNI IP allocation)
 resource "azurerm_virtual_network" "aks" {
   name                = "vnet-aks-prod"
