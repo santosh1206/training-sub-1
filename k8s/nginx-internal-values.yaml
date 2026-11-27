@@ -2,6 +2,11 @@ controller:
   replicaCount: 2
   nodeSelector:
     agentpool: userpool
+  tolerations:
+    - key: "workload"
+      operator: "Equal"
+      value: "apps"
+      effect: "NoSchedule"
   service:
     type: LoadBalancer
     externalTrafficPolicy: Local
