@@ -49,7 +49,8 @@ jobs:
           helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
             --namespace ingress-nginx --create-namespace \
             -f k8s/nginx-internal-values.yaml \
-            --wait
+            --cleanup-on-fail \
+            --wait --timeout 5m
 
       - name: Apply Namespaces & Microservice Deployments
         run: |
