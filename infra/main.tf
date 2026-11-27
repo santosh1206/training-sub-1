@@ -73,3 +73,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "userpool" {
     max_surge = "1"
   }
 }
+
+# 4. Grant Network Contributor to AKS System-Assigned Managed Identity
+resource "azurerm_role_assignment" "aks_network_contributor" {
+  scope                = azurerm_subnet.aks_nodes.id # Or use azurerm_virtual_network.aks.id if AKS manages multiple subnets/route tables
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.aks.identity[0].principal_id
+}
