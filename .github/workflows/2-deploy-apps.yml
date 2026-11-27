@@ -55,10 +55,13 @@ jobs:
       - name: Apply Namespaces & Microservice Deployments
         run: |
           kubectl apply -f k8s/namespaces.yaml
-          kubectl apply -f k8s/microservice-app.yaml
+          kubectl apply -f k8s/order-service-app.yaml
+          kubectl apply -f k8s/payment-service-app.yaml
 
       - name: Verify Rollout & Minimum 2 Pods per Service
         run: |
           kubectl rollout status deployment/order-service -n app-ns-1 --timeout=180s
+          kubectl rollout status deployment/payment-service -n app-ns-2 --timeout=180s
           kubectl get pods -n app-ns-1 -o wide
+          kubectl get pods -n app-ns-2 -o wide
           kubectl get svc -n ingress-nginx
