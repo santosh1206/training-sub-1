@@ -29,7 +29,7 @@ spec:
               app: payment-service
       containers:
         - name: payment-api
-          image: mcr.microsoft.com/azuredocs/aks-helloworld:v2
+          image: mcr.microsoft.com/azuredocs/aks-helloworld:v1
           env:
             - name: TITLE
               value: "Payment Service - Namespace 2 (app-ns-2)"
