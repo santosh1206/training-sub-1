@@ -2,8 +2,7 @@ resource "azurerm_resource_group" "aks" {
   name     = var.resource_group_name
   location = var.location
 }
-
-
+##Add Aks Cluster
 # 1. VNet & Node Subnet (Sized /22 for Classic Azure CNI IP allocation)
 resource "azurerm_virtual_network" "aks" {
   name                = "vnet-aks-prod"
